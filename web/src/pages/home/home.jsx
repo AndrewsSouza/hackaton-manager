@@ -6,7 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import AdminIcon from '../../assets/images/admin-role-icon.png'
 import RatingIcon from '../../assets/images/rating-role-icon.png'
 
-import { Header, RoleCard } from '../../components';
+import { Header, RoleCard } from '../../components'
 import { NotificationContext } from '../../contexts'
 
 import './home.scss'
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100%',
+        height: 'calc(100% - 112px)',
     },
     menuButton: {
         marginRight: theme.spacing(2),
