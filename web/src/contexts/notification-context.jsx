@@ -10,12 +10,25 @@ export function NotificationProvider(props) {
     const [isNotificationOpen, setIsNotificationOpen] = useState(false)
     const [notificationMessage, setNotificationMessage] = useState('')
     const [notificationType, setNotificationType] = useState('')
+    const [autoHideDuration, setAutoHideDuration] = useState(3000)
 
 
-    function openNotification(message, type) {
+    function openNotification(message, type, autoHideDuration = 3000) {
+        if (isNotificationOpen) {
+            setIsNotificationOpen(false)
+            setTimeout(() => {
+                setConfiguration(message, type, autoHideDuration)
+            }, 200)
+        } else {
+            setConfiguration(message, type, autoHideDuration)
+        }
+    }
+
+    function setConfiguration(message, type, autoHideDuration) {
         setIsNotificationOpen(true)
         setNotificationMessage(message)
         setNotificationType(type)
+        setAutoHideDuration(autoHideDuration)
     }
 
     return (
@@ -25,7 +38,8 @@ export function NotificationProvider(props) {
                 open={isNotificationOpen}
                 message={notificationMessage}
                 onClose={() => setIsNotificationOpen(false)}
-                type={notificationType} />
+                type={notificationType}
+                setAutoHideDuration={autoHideDuration} />
         </NotificationContext.Provider>
     )
 }

@@ -9,15 +9,15 @@ function App() {
   return (
     <div className="app">
       <LoaderProvider>
-        <ModalProvider>
-          <NotificationProvider>
+        <NotificationProvider>
+          <ModalProvider>
             <Switch>
               <Route component={Home} path='/' exact />
               <Route component={AdminHome} path='/admin' />
               <Route component={RatingHome} path='/rating' />
             </Switch>
-          </NotificationProvider>
-        </ModalProvider>
+          </ModalProvider>
+        </NotificationProvider>
       </LoaderProvider>
     </div>
   );

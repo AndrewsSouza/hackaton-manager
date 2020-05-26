@@ -19,8 +19,8 @@ const useStyles = makeStyles({
 function TeamsList({ teams }) {
     const modalService = useContext(ModalContext)
 
-    function openRatingModal() {
-        modalService.openModal(<RatingModal />)
+    function openRatingModal(teamId) {
+        modalService.openModal(<RatingModal teamId={teamId} />)
     }
 
     return (
@@ -29,7 +29,7 @@ function TeamsList({ teams }) {
                 return (
                     <div key={team.id}>
                         {index !== 0 && <Divider />}
-                        <TeamListItem index={index} team={team} onRateTeam={openRatingModal} />
+                        <TeamListItem index={index} team={team} onRateTeam={() => openRatingModal(team.id)} />
                     </div>
                 )
             })}
@@ -51,8 +51,8 @@ export function RatingHome(props) {
     const [teams, setTeams] = useState([])
 
     useEffect(() => {
-        teamsService.getTeams().then(newTeams => {
-            setTeams(newTeams)
+        teamsService.getTeams().then(({ data }) => {
+            setTeams(data)
         })
     }, [])
 

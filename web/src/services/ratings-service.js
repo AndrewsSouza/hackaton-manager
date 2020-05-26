@@ -1,8 +1,8 @@
-import api from './base-api'
+import { api } from './base-api'
 
-function saveRating(evaluatorName, works, process, pitch, inovation, teamFormation) {
-    // api.post('/ratings')
-    return Promise.resolve()
+function saveRating(appraiser, working, process, pitch, innovation, team, teamId) {
+    return api.post('/ratings', { teamId, appraiser, working, process, pitch, innovation, team })
+    // return Promise.resolve()
 }
 
 export const ratingsService = {

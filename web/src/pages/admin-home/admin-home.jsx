@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { Container, Divider, Box, Typography } from '@material-ui/core'
 import List from '@material-ui/core/List';
 
 import { Header, ParticipantListItem, NewTeamForm, TeamListItem } from '../../components'
-import { participantsService, teamsService } from '../../services'
+import { studentsService, teamsService } from '../../services'
 
 import './admin-home.scss'
+import { NotificationContext } from '../../contexts';
 
 export const pathName = '/admin'
 
@@ -43,18 +44,18 @@ const useStyles = makeStyles({
 })
 
 export function AdminHome(props) {
+    const notificationService = useContext(NotificationContext)
+
     const [allParticipants, setAllParticipants] = useState([])
-    // const [displayParticipantsList, setDisplayParticipantsList] = useState([])
-    const [displayTeam, setDisplayTeam] = useState({ name: '', members: [] })
+    const [displayTeam, setDisplayTeam] = useState({ name: '', students: [], id: null })
     const [teams, setTeams] = useState([])
 
     useEffect(() => {
-        teamsService.getTeams().then(newTeams => {
-            setTeams(newTeams)
+        teamsService.getTeams().then(({ data }) => {
+            setTeams(data)
         })
-        participantsService.getParticipants().then(newParticipants => {
-            setAllParticipants(newParticipants)
-            // setDisplayParticipantsList(newParticipants)
+        studentsService.getParticipants().then(({ data }) => {
+            setAllParticipants(data)
         })
     }, [])
 
@@ -62,42 +63,60 @@ export function AdminHome(props) {
     function addMember(id) {
         setDisplayTeam({
             ...displayTeam,
-            members: [...displayTeam.members, allParticipants.find(part => part.id === id)]
+            students: [...displayTeam.students, allParticipants.find(part => part.id === id)]
         })
-        // setDisplayParticipantsList(displayParticipantsList.filter(part => part.id !== id))
     }
 
     function removeMember(id) {
         setDisplayTeam({
             ...displayTeam,
-            members: [...displayTeam.members.filter(part => part.id !== id)]
+            students: [...displayTeam.students.filter(part => part.id !== id)]
         })
 
-        // setDisplayParticipantsList([...displayParticipantsList, allParticipants.find(part => part.id === id)])
     }
 
     function clearMembers() {
-        // const clearedMembers = [...displayTeam.members]
-        setDisplayTeam({ ...displayTeam, members: [] })
-        // setDisplayParticipantsList([...displayParticipantsList, ...clearedMembers])
+        setDisplayTeam({ ...displayTeam, students: [] })
     }
 
-    async function saveTeam() {
+    const defaultTeam = { name: '', students: [], id: null }
+
+    function saveTeam() {
         const displayTeamIndex = teams.findIndex(team => team.id === displayTeam.id)
 
         if (displayTeamIndex < 0) {
-            const savedTeam = await teamsService.saveTeam(displayTeam)
-            setDisplayTeam(savedTeam)
+            teamsService.saveTeam(displayTeam.students, displayTeam.name).then(({ data }) => {
+                if (data.success) {
+                    const { team } = data
 
-            setTeams([...teams, savedTeam])
+                    setTeams([...teams, team])
+
+                    notificationService.openNotification("Time criado com sucesso", 'success')
+                    setDisplayTeam(defaultTeam)
+                } else {
+                    notificationService.openNotification(data.message, 'error', 6000)
+                }
+            }).catch(err => {
+                notificationService.openNotification(err.message, 'error', 6000)
+            })
         } else {
-            await teamsService.editTeam(displayTeam)
-            const newTeams = [...teams]
-            newTeams[displayTeamIndex] = displayTeam
-            setTeams([...newTeams])
+            teamsService.editTeam(displayTeam.students, displayTeam.name, displayTeam.id).then(({ data }) => {
+                if (data.success) {
+                    const newTeams = [...teams]
+
+                    newTeams[displayTeamIndex] = data.team
+                    setTeams([...newTeams])
+
+                    notificationService.openNotification("Time editado com sucesso", 'success')
+                    setDisplayTeam(defaultTeam)
+                } else {
+                    notificationService.openNotification(data.message, 'error', 6000)
+                }
+            }).catch(err => {
+                notificationService.openNotification(err.message, 'error', 6000)
+            })
         }
 
-        setDisplayTeam({ name: '', members: [] })
     }
 
     function editTeam(id) {
@@ -105,10 +124,19 @@ export function AdminHome(props) {
         setDisplayTeam(team)
     }
 
-    async function deleteTeam(id) {
-        await teamsService.removeTeam(id)
-        const newTeams = teams.filter(team => team.id !== id)
-        setTeams(newTeams)
+    function deleteTeam(id) {
+        teamsService.removeTeam(id).then(({ data }) => {
+            if (data.success) {
+                const newTeams = teams.filter(team => team.id !== id)
+                setTeams(newTeams)
+
+                notificationService.openNotification("Time removido com sucesso", 'success')
+            } else {
+                notificationService.openNotification(data.message, 'error', 6000)
+            }
+        }).catch(err => {
+            notificationService.openNotification(err.message, 'error', 6000)
+        })
     }
 
     const classes = useStyles()
@@ -161,7 +189,7 @@ export function AdminHome(props) {
                                 setTeamName={(name) => setDisplayTeam({ ...displayTeam, name })}
                                 onClearMembers={clearMembers}
                                 onRemoveMember={removeMember}
-                                members={displayTeam.members}
+                                members={displayTeam.students}
                             />
                         </div>
                         <div className={classes.teams}>

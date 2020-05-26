@@ -15,7 +15,7 @@ import { Rating } from '@material-ui/lab'
 import ZeroIcon from '@material-ui/icons/ExposureZero'
 import { makeStyles } from '@material-ui/core/styles'
 
-import { ModalContext } from '../../contexts'
+import { ModalContext, NotificationContext } from '../../contexts'
 import { ratingsService } from '../../services'
 
 const useStyles = makeStyles((theme) => ({
@@ -86,8 +86,9 @@ function FeatureRating({ label, name, onChange, value }) {
     )
 }
 
-export function RatingModal() {
+export function RatingModal({ teamId }) {
     const modalService = useContext(ModalContext)
+    const notificationService = useContext(NotificationContext)
 
     const defaultRatings = {
         works: 3,
@@ -107,13 +108,20 @@ export function RatingModal() {
         setAllRatings(newRatings)
     }
 
-    async function sendRating() {
+    function sendRating() {
         const { works, process, pitch, inovation, teamFormation } = allRatings
 
-        await ratingsService.saveRating(evaluatorName, works, process, pitch, inovation, teamFormation)
-
-        setAllRatings(defaultRatings)
-        modalService.closeModal()
+        ratingsService.saveRating(evaluatorName, works, process, pitch, inovation, teamFormation, teamId).then(({ data }) => {
+            if (data.success) {
+                setAllRatings(defaultRatings)
+                notificationService.openNotification('Avaliação enviada com sucesso', 'success')
+                modalService.closeModal()
+            } else {
+                notificationService.openNotification(data.message, 'error', 6000)
+            }
+        }).catch((err) => {
+            notificationService.openNotification(err.message, 'error', 6000)
+        })
     }
 
     function cancelar() {
