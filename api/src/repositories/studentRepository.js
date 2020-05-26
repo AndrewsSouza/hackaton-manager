@@ -31,7 +31,7 @@ module.exports = {
             let student = students.find(s => s.id == studentId)
 
             teamStudents.forEach((stId, index) => {
-                if (student !== index) {
+                if (studentIndex !== index) {
                     hasSameStudentTwice = Number(stId) === Number(studentId)
                 }
             })
