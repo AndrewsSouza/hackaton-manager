@@ -11,7 +11,7 @@ import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from '@material-ui/icons/Delete'
 import RateIcon from '@material-ui/icons/Grade'
 import { makeStyles } from '@material-ui/core/styles'
-import { red, yellow } from '@material-ui/core/colors';
+import { red, yellow, grey } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme) => ({
     icons: {
@@ -35,6 +35,8 @@ export function TeamListItem(props) {
 
     const classes = useStyles()
 
+    const starColor = team.ratings.length > 0 ? yellow[600] : grey[500]
+
     function RenderIcons() {
         return (
 
@@ -56,7 +58,7 @@ export function TeamListItem(props) {
                 {!!onRateTeam && (
                     <Tooltip title='Avaliar time'>
                         <IconButton className={classes.icons} edge="end" aria-label="rate" onClick={onRateTeam}>
-                            <RateIcon style={{ color: yellow[600] }} />
+                            <RateIcon style={{ color: starColor }} />
                         </IconButton>
                     </Tooltip>
                 )}
