@@ -50,27 +50,39 @@ export function AdminHome(props) {
     const [displayTeam, setDisplayTeam] = useState({ name: '', students: [], id: null })
     const [teams, setTeams] = useState([])
 
+    function getStudents() {
+        studentsService.getParticipants().then(({ data }) => {
+            setAllParticipants(data)
+        })
+    }
+
     useEffect(() => {
         teamsService.getTeams().then(({ data }) => {
             setTeams(data)
         })
-        studentsService.getParticipants().then(({ data }) => {
-            setAllParticipants(data)
-        })
+
+        getStudents()
     }, [])
 
 
     function addMember(id) {
+        const alreadyInTheTeam = displayTeam.students.some(s => Number(s.id) === Number(id))
+
+        if(alreadyInTheTeam){
+            notificationService.openNotification('Não é possível adicionar um estudante duas vezes no mesmo time', 'error', 6000)
+            return
+        }
+
         setDisplayTeam({
             ...displayTeam,
-            students: [...displayTeam.students, allParticipants.find(part => part.id === id)]
+            students: [...displayTeam.students, allParticipants.find(part => Number(part.id) === Number(id))]
         })
     }
 
     function removeMember(id) {
         setDisplayTeam({
             ...displayTeam,
-            students: [...displayTeam.students.filter(part => part.id !== id)]
+            students: [...displayTeam.students.filter(part => Number(part.id) !== Number(id))]
         })
 
     }
@@ -90,6 +102,7 @@ export function AdminHome(props) {
                     const { team } = data
 
                     setTeams([...teams, team])
+                    getStudents()
 
                     notificationService.openNotification("Time criado com sucesso", 'success')
                     setDisplayTeam(defaultTeam)
@@ -106,6 +119,7 @@ export function AdminHome(props) {
 
                     newTeams[displayTeamIndex] = data.team
                     setTeams([...newTeams])
+                    getStudents()
 
                     notificationService.openNotification("Time editado com sucesso", 'success')
                     setDisplayTeam(defaultTeam)
@@ -129,6 +143,7 @@ export function AdminHome(props) {
             if (data.success) {
                 const newTeams = teams.filter(team => team.id !== id)
                 setTeams(newTeams)
+                getStudents()
 
                 notificationService.openNotification("Time removido com sucesso", 'success')
             } else {

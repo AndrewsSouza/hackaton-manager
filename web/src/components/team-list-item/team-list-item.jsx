@@ -5,6 +5,7 @@ import {
     ListItemSecondaryAction,
     IconButton,
     Tooltip,
+    Typography,
 } from '@material-ui/core'
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from '@material-ui/icons/Delete'
@@ -23,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
     },
     evenListItem: {
         backgroundColor: '#f6f6f6',
+    },
+    teamDescription: {
+        fontSize: 12,
     },
 }))
 
@@ -60,9 +64,19 @@ export function TeamListItem(props) {
         )
     }
 
+    function TeamDescription() {
+        let membersNames = team.students.map(s => s.name)
+        membersNames = membersNames.join(' - ')
+        return (
+            <Typography className={classes.teamDescription}>
+                Membros: {membersNames}
+            </Typography>
+        )
+    }
+
     return (
         <ListItem button className={index % 2 === 0 || index === 0 ? classes.evenListItem : null}>
-            <ListItemText primary={team.name} />
+            <ListItemText primary={team.name} secondary={<TeamDescription />} />
             <RenderIcons />
         </ListItem>
     );

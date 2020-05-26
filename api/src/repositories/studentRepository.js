@@ -23,11 +23,19 @@ module.exports = {
     },
     verifyMembers: (teamStudents) => {
 
+        let hasSameStudentTwice = false
         let hasSomeMemberWithTeam = false
         let hasDifferentPrograms = false
 
-        teamStudents.forEach(studentId => {
+        teamStudents.forEach((studentId, studentIndex) => {
             let student = students.find(s => s.id == studentId)
+
+            teamStudents.forEach((stId, index) => {
+                if (student !== index) {
+                    hasSameStudentTwice = Number(stId) === Number(studentId)
+                }
+            })
+
             if (student != undefined) {
                 if (student.teamMember) {
                     hasSomeMemberWithTeam = true
@@ -49,7 +57,9 @@ module.exports = {
             return { success: false, message: 'Algum dos membros já faz parte de um time' }
         else if (!hasDifferentPrograms)
             return { success: false, message: 'Para formar um time, é necessário que haja integrantes de pelo menos 2 cursos diferentes' }
-        else
+        else if (hasSameStudentTwice) {
+            return { success: false, message: 'Não pode haver um(a) estudante duas vezes no mesmo time' }
+        } else
             return { success: true, message: '' }
     },
     joinMembers: (teamStudents) => {
