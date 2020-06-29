@@ -1,4 +1,7 @@
 import Student from "../domains/entities/student"
+import knex from '../database/connection'
+import { Transaction, QueryBuilder } from "knex"
+import TransactionSingleton from "./transaction"
 
 let id = 0
 
@@ -16,23 +19,58 @@ const defaultStudents = [
 
 export default class StudentRepository {
     students: Student[]
-    
+    private tableName = "students"
+
     constructor() {
         this.students = defaultStudents
         this.getAllStudents = this.getAllStudents.bind(this)
         this.getByListId = this.getByListId.bind(this)
+        this.getByTeam = this.getByTeam.bind(this)
         this.updateStudent = this.updateStudent.bind(this)
     }
-    getAllStudents(): Student[] {
-        return this.students
+    async getAllStudents(): Promise<Student[]> {
+        return await knex(this.tableName)
     }
 
-    getByListId(studentsId: Number[]): Student[] {
-        return this.students.filter((student: Student) => studentsId.includes(student.id))
+    async getByListId(studentsId: Number[]): Promise<Student[]> {
+        return await knex(this.tableName).whereIn("id", studentsId)
+    }
+
+    async getByTeam(teamId: Number): Promise<Student[]> {
+        return await knex(this.tableName).where("teamId", teamId)
     }
 
     updateStudent(student: Student): void {
         const index = this.students.findIndex((std: Student) => std.id === student.id)
         this.students[index] = student
+    }
+
+    async joinMembers(studentsId: Number[], teamId: Number): Promise<void> {
+        const trx = await TransactionSingleton.getInstance()
+
+        const updateQueries = studentsId.map(id => {
+            const query = `UPDATE ${this.tableName} SET teamId = ${teamId}, teamMember = 1 WHERE id = ${id};`
+            return trx.raw(query)
+        })
+
+        await Promise.all(updateQueries)
+    }
+
+    async disjoinMembersById(studentsId: Number[]): Promise<void> {
+        const trx = await TransactionSingleton.getInstance()
+
+        const updateQueries = studentsId.map(id => {
+            const query = `UPDATE ${this.tableName} SET teamId = null, teamMember = 0 WHERE id = ${id};`
+            return trx.raw(query)
+        })
+
+        await Promise.all(updateQueries)
+    }
+
+    async disjoinMembersByTeamId(teamId: Number): Promise<void> {
+        const trx = await TransactionSingleton.getInstance()
+
+        const query = `UPDATE ${this.tableName} SET teamId = null, teamMember = 0 WHERE teamId = ${teamId};`
+        await trx.raw(query)
     }
 }

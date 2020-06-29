@@ -10,12 +10,13 @@ export default class RatingController {
         this.saveRating = this.saveRating.bind(this)
     }
 
-    saveRating(req: Request, res: Response, next: NextFunction): any {
-        const { teamId, appraiser, working, process, pitch, innovation, team } = req.body
+    async saveRating(req: Request, res: Response, next: NextFunction): Promise<any> {
+        const { teamId, appraiserCpf, appraiserPassword, working, process, pitch, innovation, team } = req.body
 
-        const response = this.ratingService.saveRating(
+        const response = await this.ratingService.saveRating(
             Number(teamId),
-            appraiser,
+            appraiserCpf,
+            appraiserPassword,
             Number(working),
             Number(process),
             Number(pitch),
@@ -23,6 +24,7 @@ export default class RatingController {
             Number(team),
         )
 
-        return res.send(response)
+        res.send(response)
+        next()
     }
 }

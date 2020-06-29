@@ -1,36 +1,42 @@
 import Team from '../domains/entities/team'
-let id = 0
+import knex from '../database/connection'
+import TransactionSingleton from './transaction'
 
 export default class TeamRepository {
-    teams: Team[]
+    private tableName = "teams"
 
     constructor() {
-        this.teams = []
         this.getAllTeams = this.getAllTeams.bind(this)
         this.saveTeam = this.saveTeam.bind(this)
         this.findById = this.findById.bind(this)
         this.updateTeam = this.updateTeam.bind(this)
         this.removeTeam = this.removeTeam.bind(this)
     }
-    getAllTeams(): Team[] {
-        return [...this.teams]
+
+    async getAllTeams(): Promise<Team[]> {
+        return await knex(this.tableName)
     }
 
-    saveTeam(team: Team): void {
-        team.id = id++
-        this.teams.push(team)
+    async saveTeam(teamName: String): Promise<Number> {
+        const trx = await TransactionSingleton.getInstance()
+
+        const insertedIds = await trx(this.tableName).insert({ name: teamName })
+
+        return insertedIds[0]
     }
 
-    findById(teamId: Number): Team | undefined {
-        return this.teams.find(t => t.id === teamId)
+    async findById(teamId: Number): Promise<any> {
+        return await knex(this.tableName).where('id', teamId).first()
     }
 
-    updateTeam(team: Team): void {
-        const index = this.teams.findIndex(t => t.id === team.id)
-        this.teams[index] = team
+    async updateTeam(teamId: Number, name: String): Promise<void> {
+        const trx = await TransactionSingleton.getInstance()
+        await trx(this.tableName).update({ id: teamId, name })
     }
 
-    removeTeam(teamId: Number): void {
-        this.teams = this.teams.filter(t => Number(t.id) !== Number(teamId))
+    async removeTeam(teamId: Number): Promise<void> {
+        const trx = await TransactionSingleton.getInstance()
+
+        await trx(this.tableName).where('id', teamId).del()
     }
 }

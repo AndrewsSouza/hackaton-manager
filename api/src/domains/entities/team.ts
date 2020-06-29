@@ -6,7 +6,9 @@ export default class Team {
     name: String
     ratings: Rating[]
     id: Number
-    constructor(students: Student[], name: String) {
+    
+    constructor(id:Number, students: Student[], name: String) {
+        this.id = id
         this.students = students
         this.name = name
         this.ratings = []

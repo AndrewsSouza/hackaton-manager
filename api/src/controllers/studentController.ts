@@ -10,9 +10,10 @@ export default class StudentController {
         this.getAllStudents = this.getAllStudents.bind(this)
     }
 
-    getAllStudents(req: Request, res: Response, next: NextFunction): any {
-    const students = this.studentService.getAllStudents()
+    async getAllStudents(req: Request, res: Response, next: NextFunction): Promise<any> {
+        const students = await this.studentService.getAllStudents()
 
-    return res.json(students)
-}
+        res.json(students)
+        next()
+    }
 }

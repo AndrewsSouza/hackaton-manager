@@ -13,34 +13,38 @@ export default class TeamController {
         this.removeTeam = this.removeTeam.bind(this)
     }
 
-    getAllTeams(req: Request, res: Response, next: NextFunction) {
-        const teams = this.teamService.getAllTeams()
-        return res.json(teams)
+    async getAllTeams(req: Request, res: Response, next: NextFunction) {
+        const teams = await this.teamService.getAllTeams()
+        res.json(teams)
+        next()
     }
 
-    saveTeam(req: Request, res: Response, next: NextFunction): any {
+    async saveTeam(req: Request, res: Response, next: NextFunction): Promise<any> {
         const { students, name } = req.body
 
         const studentsId = students.map((st: any) => Number(st))
 
-        const result = this.teamService.saveTeam(studentsId, name)
-        return res.send({ ...result })
+        const result = await this.teamService.saveTeam(studentsId, name)
+        res.send({ ...result })
+        next()
     }
 
-    updateTeam(req: Request, res: Response, next: NextFunction): any {
+    async updateTeam(req: Request, res: Response, next: NextFunction): Promise<any> {
         const { id, students, name } = req.body
 
         const studentsId = students.map((st: any) => Number(st))
 
-        const result = this.teamService.updateTeam(Number(id), studentsId, name)
-        return res.send({ ...result })
+        const result = await this.teamService.updateTeam(Number(id), studentsId, name)
+        res.send({ ...result })
+        next()
     }
-    
-    removeTeam(req: Request, res: Response, next: NextFunction): any {
+
+    async removeTeam(req: Request, res: Response, next: NextFunction): Promise<any> {
         const { id } = req.params
 
-        const result = this.teamService.removeTeam(Number(id))
+        const result = await this.teamService.removeTeam(Number(id))
 
-        return res.send({ ...result })
+        res.send({ ...result })
+        next()
     }
 }
