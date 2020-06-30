@@ -1,6 +1,5 @@
 import Student from "../../domains/entities/student";
 import BaseResponseDto from "../../domains/dtos/baseResponseDto";
-import { StudentPrograms } from "../../domains/enums/studentPrograms";
 
 export default interface StudentServiceFacade {
     getAllStudents(): Promise<Student[]>
