@@ -1,8 +1,11 @@
 import Student from "../../domains/entities/student";
-import BaseResponseDto from "../../domains/dto/baseResponseDto";
+import BaseResponseDto from "../../domains/dtos/baseResponseDto";
+import { StudentPrograms } from "../../domains/enums/studentPrograms";
 
 export default interface StudentServiceFacade {
     getAllStudents(): Promise<Student[]>
+
+    saveStudent(name: String, program: String): Promise<BaseResponseDto>
 
     verifyMembers(studentsId: Number[]): any // definir retorno
 
@@ -14,5 +17,5 @@ export default interface StudentServiceFacade {
 
     getStudentsByTeamId(teamId: Number): Promise<Student[]>
 
-    getByListId(studentsId: Number[]): any // definir retorno
+    getByListId(studentsId: Number[]): Promise<Student[]> // definir retorno
 }

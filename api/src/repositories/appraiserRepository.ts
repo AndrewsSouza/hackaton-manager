@@ -1,6 +1,6 @@
 import TransactionSingleton from './transaction'
 import Appraiser from '../domains/entities/appraiser'
-import BaseResponseDto from '../domains/dto/baseResponseDto'
+import BaseResponseDto from '../domains/dtos/baseResponseDto'
 import { compare } from 'bcrypt'
 
 export default class AppraiserRepository {

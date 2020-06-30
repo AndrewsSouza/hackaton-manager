@@ -1,4 +1,4 @@
-import BaseResponseDto from "../../domains/dto/baseResponseDto";
+import BaseResponseDto from "../../domains/dtos/baseResponseDto";
 import Appraiser from "../../domains/entities/appraiser";
 
 export default interface AppraiserServiceFacade {

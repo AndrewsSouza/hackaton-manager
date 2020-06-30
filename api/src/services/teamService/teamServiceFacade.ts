@@ -1,13 +1,16 @@
 import Team from "../../domains/entities/team";
+import BaseResponseDto from "../../domains/dtos/baseResponseDto";
 
 export default interface TeamServiceFacade {
-    getAllTeams(): Promise<Team[]>,
+    getAllTeamsWithStudents(): Promise<Team[]>,
 
-    saveTeam(studentsId: Number[], name: String): Promise<any>, // definir retorno
+    getTeamsWithStudentsAndRatings(teamsId?: Number[]): Promise<Team[]>,
 
-    updateTeam(id: Number, studentsId: Number[], name: String): any // definir retorno
+    saveTeam(studentsId: Number[], name: String): Promise<BaseResponseDto>, // definir retorno
 
-    removeTeam(id: Number): any, // definir retorno
+    updateTeam(id: Number, studentsId: Number[], name: String): Promise<BaseResponseDto> // definir retorno
 
-    findById(id: Number): Promise<Team>, // definir retorno
+    removeTeam(id: Number): Promise<BaseResponseDto>, // definir retorno
+
+    findById(id: Number): Promise<BaseResponseDto>, // definir retorno
 }

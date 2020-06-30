@@ -1,35 +1,24 @@
 import Student from "../domains/entities/student"
 import knex from '../database/connection'
-import { Transaction, QueryBuilder } from "knex"
 import TransactionSingleton from "./transaction"
-
-let id = 0
-
-const defaultStudents = [
-    new Student(++id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Crystal_Clear_kdm_user_female.svg/1200px-Crystal_Clear_kdm_user_female.svg.png', 'Aline', 'ES'),
-    new Student(++id, 'https://png.pngtree.com/element_our/png/20181206/users-vector-icon-png_260862.jpg', 'Douglas', 'SI'),
-    new Student(++id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Crystal_Clear_kdm_user_female.svg/1200px-Crystal_Clear_kdm_user_female.svg.png', 'Edna', 'SI'),
-    new Student(++id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Crystal_Clear_kdm_user_female.svg/1200px-Crystal_Clear_kdm_user_female.svg.png', 'Flávia', 'CC'),
-    new Student(++id, 'https://png.pngtree.com/element_our/png/20181206/users-vector-icon-png_260862.jpg', 'Gerson', 'CC'),
-    new Student(++id, 'https://png.pngtree.com/element_our/png/20181206/users-vector-icon-png_260862.jpg', 'Jorge', 'ES'),
-    new Student(++id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Crystal_Clear_kdm_user_female.svg/1200px-Crystal_Clear_kdm_user_female.svg.png', 'Maria', 'ES'),
-    new Student(++id, 'https://png.pngtree.com/element_our/png/20181206/users-vector-icon-png_260862.jpg', 'Pablo', 'SI'),
-    new Student(++id, 'https://png.pngtree.com/element_our/png/20181206/users-vector-icon-png_260862.jpg', 'Pedro', 'CC')
-]
+import { StudentPrograms } from "../domains/enums/studentPrograms"
 
 export default class StudentRepository {
-    students: Student[]
     private tableName = "students"
 
     constructor() {
-        this.students = defaultStudents
         this.getAllStudents = this.getAllStudents.bind(this)
         this.getByListId = this.getByListId.bind(this)
         this.getByTeam = this.getByTeam.bind(this)
-        this.updateStudent = this.updateStudent.bind(this)
     }
     async getAllStudents(): Promise<Student[]> {
         return await knex(this.tableName)
+    }
+
+    async findById(id: Number): Promise<Student> {
+        const trx = await TransactionSingleton.getInstance()
+
+        return await trx(this.tableName).where({id}).first()
     }
 
     async getByListId(studentsId: Number[]): Promise<Student[]> {
@@ -40,9 +29,15 @@ export default class StudentRepository {
         return await knex(this.tableName).where("teamId", teamId)
     }
 
-    updateStudent(student: Student): void {
-        const index = this.students.findIndex((std: Student) => std.id === student.id)
-        this.students[index] = student
+    async saveStudent(name: String, program: StudentPrograms): Promise<Number> {
+        const trx = await TransactionSingleton.getInstance()
+        const [id] = await trx(this.tableName).insert({ name, program })
+        return id
+    }
+
+    async removeStudent(id: Number): Promise<void> {
+        const trx = await TransactionSingleton.getInstance()
+        await trx(this.tableName).del().where({ id })
     }
 
     async joinMembers(studentsId: Number[], teamId: Number): Promise<void> {

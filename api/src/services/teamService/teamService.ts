@@ -3,35 +3,66 @@ import Student from "../../domains/entities/student";
 import TeamServiceFacade from "./teamServiceFacade";
 import TeamRepository from "../../repositories/teamRepository";
 import StudentServiceFacade from "../studentService/studentServiceFacade";
-import StudentService from "../studentService/studentService";
 import TransactionSingleton from "../../repositories/transaction";
-import BaseResponseDto from "../../domains/dto/baseResponseDto";
+import BaseResponseDto from "../../domains/dtos/baseResponseDto";
+import RatingServiceFacade from "../ratingService/ratingServiceFacade";
+import ServiceFactory from "../serviceFactory";
+import Rating from "../../domains/entities/rating";
 
 export default class TeamService implements TeamServiceFacade {
     teamRepository: TeamRepository
     studentService: StudentServiceFacade
+    ratingService: RatingServiceFacade
 
     constructor() {
         this.teamRepository = new TeamRepository()
-        this.studentService = new StudentService()
 
-        this.getAllTeams = this.getAllTeams.bind(this)
+        this.studentService = ServiceFactory.getStudentService()
+        this.ratingService = ServiceFactory.getRatingService()
+
+        this.getAllTeamsWithStudents = this.getAllTeamsWithStudents.bind(this)
+        this.getTeamsWithStudentsAndRatings = this.getTeamsWithStudentsAndRatings.bind(this)
         this.saveTeam = this.saveTeam.bind(this)
         this.updateTeam = this.updateTeam.bind(this)
         this.removeTeam = this.removeTeam.bind(this)
         this.findById = this.findById.bind(this)
     }
-    async getAllTeams(): Promise<Team[]> {
-        const teams = await this.teamRepository.getAllTeams()
-        //Buscar do repository ja com os students?
-        const queries = teams.map(async team => {
+
+    private async getStudents(teams: Team[]): Promise<Student[][]> {
+        const studentsQueries = teams.map(async team => {
             return this.studentService.getStudentsByTeamId(team.id)
         });
 
-        const results = await Promise.all(queries)
+        return await Promise.all(studentsQueries)
+    }
+
+    private async getRatings(teams: Team[]): Promise<Rating[][]> {
+        const ratingsQueries = teams.map(async team => {
+            return this.ratingService.findByTeamId(team.id)
+        });
+
+        return await Promise.all(ratingsQueries)
+    }
+
+    async getAllTeamsWithStudents(): Promise<Team[]> {
+        const teams = await this.teamRepository.getTeams()
+        const studentsQueriesResults = await this.getStudents(teams)
 
         teams.forEach((team, index) => {
-            team.students = results[index]
+            team.students = studentsQueriesResults[index]
+        })
+
+        return teams
+    }
+
+    async getTeamsWithStudentsAndRatings(teamsId: Number[] = []): Promise<Team[]> {
+        const teams = await this.teamRepository.getTeams(teamsId)
+        const studentsQueriesResults = await this.getStudents(teams)
+        const ratingsQueriesResults = await this.getRatings(teams)
+
+        teams.forEach((team, index) => {
+            team.students = studentsQueriesResults[index]
+            team.ratings = ratingsQueriesResults[index]
         })
 
         return teams
@@ -69,12 +100,13 @@ export default class TeamService implements TeamServiceFacade {
         return responseVerifyMembers
     }
 
-    async updateTeam(teamId: Number, studentsId: Number[], name: String): Promise<any> {
+    async updateTeam(teamId: Number, studentsId: Number[], name: String): Promise<BaseResponseDto> {
         const team: Team = await this.teamRepository.findById(teamId)
         team.students = await this.studentService.getStudentsByTeamId(teamId)
 
         if (!!team) {
             const removedStudents = team.students.filter((student: Student) => !studentsId.includes(student.id))
+            const addedStudentsId = studentsId.filter(stId => !team.students.map(st => st.id).includes(stId))
 
             const trx = await TransactionSingleton.getInstance()
             try {
@@ -83,7 +115,10 @@ export default class TeamService implements TeamServiceFacade {
                     await this.studentService.disjoinMembersById(removedStudents.map((student: Student) => student.id))
                 }
 
-                await this.studentService.joinMembers(studentsId, teamId)
+                if (addedStudentsId.length > 0) {
+                    await this.studentService.joinMembers(addedStudentsId, teamId)
+                }
+
                 await this.teamRepository.updateTeam(teamId, name)
 
                 await trx.commit()
@@ -91,7 +126,10 @@ export default class TeamService implements TeamServiceFacade {
                 team.name = name
                 team.students = await this.studentService.getByListId(studentsId)
 
-                return { success: true, message: 'Time editado com sucesso', team }
+                const response = new BaseResponseDto('Time editado com sucesso')
+                response.team = team
+
+                return response
             } catch (err) {
                 await trx.rollback()
                 const response = new BaseResponseDto("Não possível editar o time", false)
@@ -100,10 +138,10 @@ export default class TeamService implements TeamServiceFacade {
                 return response
             }
         }
-        return { success: false, message: 'Nenhum time com esse identificador foi encontrado' }
+        return new BaseResponseDto('Nenhum time com esse identificador foi encontrado', false)
     }
 
-    async removeTeam(id: Number): Promise<any> {
+    async removeTeam(id: Number): Promise<BaseResponseDto> {
         const team = await this.teamRepository.findById(id)
 
         if (!!team) {
@@ -115,7 +153,7 @@ export default class TeamService implements TeamServiceFacade {
                 await this.teamRepository.removeTeam(id)
                 await trx.commit()
 
-                return { success: true, message: 'Time removido com sucesso' }
+                return new BaseResponseDto('Time removido com sucesso')
             } catch (err) {
                 await trx.rollback()
                 const response = new BaseResponseDto("Não foi possível remover o time", false)
@@ -124,10 +162,18 @@ export default class TeamService implements TeamServiceFacade {
                 return response
             }
         }
-        return { success: false, message: 'Nenhum time com esse identificador foi encontrado' }
+        return new BaseResponseDto('Nenhum time com esse identificador foi encontrado', false)
     }
 
-    async findById(id: Number): Promise<Team> {
-        return await this.teamRepository.findById(id)
+    async findById(id: Number): Promise<BaseResponseDto> {
+        const team = await this.teamRepository.findById(id)
+        if (!team) {
+            return new BaseResponseDto("Time não encontrado", false)
+        }
+
+        const response = new BaseResponseDto()
+        response.team = team
+
+        return response
     }
 }

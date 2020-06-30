@@ -35,7 +35,7 @@ export function TeamListItem(props) {
 
     const classes = useStyles()
 
-    const starColor = team.ratings.length > 0 ? yellow[600] : grey[500]
+    const starColor = !!team.ratings > 0 ? yellow[600] : grey[500]
 
     function RenderIcons() {
         return (

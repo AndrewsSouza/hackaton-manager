@@ -1,21 +1,22 @@
 export default class Rating {
     appraiserId: Number
     teamId: Number
-    working: Number
-    process: Number
-    pitch: Number
-    innovation: Number
-    team: Number
+    working: number
+    process: number
+    pitch: number
+    innovation: number
+    team: number
     id?: Number
+    sum?: number
 
     constructor(
         appraiserId: Number,
         teamId: Number,
-        working: Number,
-        process: Number,
-        pitch: Number,
-        innovation: Number,
-        team: Number,
+        working: number,
+        process: number,
+        pitch: number,
+        innovation: number,
+        team: number,
         id?: Number,
     ) {
         this.appraiserId = appraiserId

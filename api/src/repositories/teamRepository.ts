@@ -6,15 +6,21 @@ export default class TeamRepository {
     private tableName = "teams"
 
     constructor() {
-        this.getAllTeams = this.getAllTeams.bind(this)
+        this.getTeams = this.getTeams.bind(this)
         this.saveTeam = this.saveTeam.bind(this)
         this.findById = this.findById.bind(this)
         this.updateTeam = this.updateTeam.bind(this)
         this.removeTeam = this.removeTeam.bind(this)
     }
 
-    async getAllTeams(): Promise<Team[]> {
-        return await knex(this.tableName)
+    async getTeams(teamsId: Number[] = []): Promise<Team[]> {
+        const trx = await TransactionSingleton.getInstance()
+
+        if (teamsId.length < 1) {
+            return await trx(this.tableName)
+        }
+
+        return await trx(this.tableName).whereIn('id', teamsId)
     }
 
     async saveTeam(teamName: String): Promise<Number> {
@@ -31,7 +37,7 @@ export default class TeamRepository {
 
     async updateTeam(teamId: Number, name: String): Promise<void> {
         const trx = await TransactionSingleton.getInstance()
-        await trx(this.tableName).update({ id: teamId, name })
+        await trx(this.tableName).update({ name }).where({ id: teamId })
     }
 
     async removeTeam(teamId: Number): Promise<void> {

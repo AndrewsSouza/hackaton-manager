@@ -1,14 +1,17 @@
 import StudentServiceFacade from './studentServiceFacade'
 import Student from '../../domains/entities/student';
 import StudentRepository from '../../repositories/studentRepository';
-import BaseResponseDto from '../../domains/dto/baseResponseDto';
+import BaseResponseDto from '../../domains/dtos/baseResponseDto';
+import { fromString } from '../../domains/enums/studentPrograms';
 
 export default class StudentService implements StudentServiceFacade {
     studentRepository: StudentRepository
 
     constructor() {
         this.studentRepository = new StudentRepository()
+
         this.getAllStudents = this.getAllStudents.bind(this)
+        this.saveStudent = this.saveStudent.bind(this)
         this.hasDifferentPrograms = this.hasDifferentPrograms.bind(this)
         this.hasStudentTwice = this.hasStudentTwice.bind(this)
         this.verifyMembers = this.verifyMembers.bind(this)
@@ -20,6 +23,22 @@ export default class StudentService implements StudentServiceFacade {
 
     async getAllStudents(): Promise<Student[]> {
         return await this.studentRepository.getAllStudents()
+    }
+
+    async saveStudent(name: String, program: String): Promise<BaseResponseDto> {
+        const validProgram = fromString(program)
+
+        if (!validProgram) {
+            return new BaseResponseDto("Curso inválido", false)
+        }
+
+        const id = await this.studentRepository.saveStudent(name, validProgram)
+        const student = await this.studentRepository.findById(id)
+
+        const response = new BaseResponseDto("Usuário cadastrado com sucesso")
+        response.student = student
+
+        return response
     }
 
     private hasDifferentPrograms(students: Student[]): boolean {
@@ -98,7 +117,7 @@ export default class StudentService implements StudentServiceFacade {
         return await this.studentRepository.getByTeam(teamId)
     }
 
-    async getByListId(studentsId: Number[]) {
+    async getByListId(studentsId: Number[]):Promise<Student[]> {
         return await this.studentRepository.getByListId(studentsId)
     }
 

@@ -6,6 +6,7 @@ export default class Team {
     name: String
     ratings: Rating[]
     id: Number
+    finalRating?: number
     
     constructor(id:Number, students: Student[], name: String) {
         this.id = id

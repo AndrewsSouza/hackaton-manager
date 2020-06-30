@@ -1,7 +1,7 @@
 import Appraiser from "../../domains/entities/appraiser";
 import AppraiserServiceFacade from "./appraiserServiceFacade";
 import AppraiserRepository from '../../repositories/appraiserRepository'
-import BaseResponseDto from "../../domains/dto/baseResponseDto";
+import BaseResponseDto from "../../domains/dtos/baseResponseDto";
 
 export default class AppraiserService implements AppraiserServiceFacade {
     appraiserRepository: AppraiserRepository
