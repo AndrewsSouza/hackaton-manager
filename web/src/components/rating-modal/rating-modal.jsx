@@ -10,7 +10,11 @@ import {
     FormControl,
     FilledInput,
     InputLabel,
+    InputAdornment,
+    OutlinedInput
 } from '@material-ui/core'
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { Rating } from '@material-ui/lab'
 import ZeroIcon from '@material-ui/icons/ExposureZero'
 import { makeStyles } from '@material-ui/core/styles'
@@ -98,7 +102,9 @@ export function RatingModal({ teamId }) {
         teamFormation: 3,
     }
 
-    const [evaluatorName, setEvaluatorName] = useState('')
+    const [evaluatorCpf, setEvaluatorCpf] = useState('')
+    const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const [allRatings, setAllRatings] = useState(defaultRatings)
 
     function handleRatingsChange({ name, value }) {
@@ -108,10 +114,19 @@ export function RatingModal({ teamId }) {
         setAllRatings(newRatings)
     }
 
+    function cpfMask(value) {
+        return value
+            .replace(/\D/g, '') // substitui qualquer caracter que nao seja numero por nada
+            .replace(/(\d{3})(\d)/, '$1.$2') // captura 2 grupos de numero o primeiro de 3 e o segundo de 1, apos capturar o primeiro grupo ele adiciona um ponto antes do segundo grupo de numero
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+            .replace(/(-\d{2})\d+?$/, '$1') // captura 2 numeros seguidos de um traço e não deixa ser digitado mais nada
+    }
+
     function sendRating() {
         const { works, process, pitch, inovation, teamFormation } = allRatings
 
-        ratingsService.saveRating(evaluatorName, works, process, pitch, inovation, teamFormation, teamId).then(({ data }) => {
+        ratingsService.saveRating(evaluatorCpf, password, works, process, pitch, inovation, teamFormation, teamId).then(({ data }) => {
             if (data.success) {
                 setAllRatings(defaultRatings)
                 notificationService.openNotification('Avaliação enviada com sucesso', 'success')
@@ -128,6 +143,7 @@ export function RatingModal({ teamId }) {
         setAllRatings(defaultRatings)
         modalService.closeModal()
     }
+
     const classes = useStyles()
     return (
         <Container>
@@ -144,11 +160,35 @@ export function RatingModal({ teamId }) {
                 <Box height={20} />
                 <FeatureRating value={allRatings.teamFormation} name='teamFormation' onChange={({ target }) => handleRatingsChange(target)} label='Formação do Time' />
                 <Box height={20} />
-                <FormControl fullWidth className={classes.margin} variant="filled">
-                    <InputLabel htmlFor="filled-adornment-amount">Nome do Avaliador</InputLabel>
-                    <FilledInput
-                        value={evaluatorName}
-                        onChange={({ target }) => setEvaluatorName(target.value)}
+                <FormControl fullWidth className={classes.margin} variant="outlined" size='small'>
+                    <InputLabel htmlFor="cpf-field">Cpf do Avaliador</InputLabel>
+                    <OutlinedInput
+                        id='cpf-field'
+                        type="string"
+                        value={evaluatorCpf}
+                        onChange={({ target }) => setEvaluatorCpf(cpfMask(target.value))}
+                        labelWidth={120}
+                    />
+                </FormControl>
+                <FormControl fullWidth className={classes.margin} variant="outlined" size='small'>
+                    <InputLabel htmlFor="password-field">Senha</InputLabel>
+                    <OutlinedInput
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={({ target }) => setPassword(target.value)}
+                        endAdornment={
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    edge="end"
+                                >
+                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                        labelWidth={45}
                     />
                 </FormControl>
             </Container>
@@ -157,7 +197,7 @@ export function RatingModal({ teamId }) {
                 <Button variant="text" color="secondary" onClick={cancelar}>
                     Cancelar
                     </Button>
-                <Button disabled={!evaluatorName} variant="contained" color="primary" onClick={sendRating}>
+                <Button disabled={!evaluatorCpf || !password} variant="contained" color="primary" onClick={sendRating}>
                     Enviar
                     </Button>
             </Container>

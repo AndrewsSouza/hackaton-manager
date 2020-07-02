@@ -1,5 +1,7 @@
+import Appraiser from "./appraiser"
+
 export default class Rating {
-    appraiserId: Number
+    appraiser: Appraiser
     teamId: Number
     working: number
     process: number
@@ -10,7 +12,7 @@ export default class Rating {
     sum?: number
 
     constructor(
-        appraiserId: Number,
+        appraiser: Appraiser,
         teamId: Number,
         working: number,
         process: number,
@@ -19,7 +21,7 @@ export default class Rating {
         team: number,
         id?: Number,
     ) {
-        this.appraiserId = appraiserId
+        this.appraiser = appraiser
         this.teamId = teamId
         this.working = working
         this.process = process

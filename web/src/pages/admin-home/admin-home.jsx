@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { Container, Divider, Box, Typography } from '@material-ui/core'
+import { Container, Divider, Box, Typography, Button } from '@material-ui/core'
 import List from '@material-ui/core/List';
+import AddIcon from '@material-ui/icons/Add'
 
 import { Header, ParticipantListItem, NewTeamForm, TeamListItem } from '../../components'
 import { studentsService, teamsService } from '../../services'
@@ -27,6 +28,7 @@ const useStyles = makeStyles({
         maxHeight: 600,
         flex: 1,
         overflowY: 'auto',
+        padding: 0
     },
     teamsList: {
         maxHeight: 150,
@@ -41,6 +43,22 @@ const useStyles = makeStyles({
         flex: 1,
         marginTop: 15,
     },
+    studentListHeader: {
+        justifyContent: 'space-between',
+        display: 'flex',
+        flexDirection: 'row',
+        marginBottom: 10
+    },
+    addStudentButton: {
+        backgroundColor: "#66bb6a",
+        color: "FFFFFF",
+        '*':{
+            color: "FFF"
+        },
+        '&:hover':{
+            backgroundColor: "#66bb6a",
+        }
+    }
 })
 
 export function AdminHome(props) {
@@ -68,7 +86,7 @@ export function AdminHome(props) {
     function addMember(id) {
         const alreadyInTheTeam = displayTeam.students.some(s => Number(s.id) === Number(id))
 
-        if(alreadyInTheTeam){
+        if (alreadyInTheTeam) {
             notificationService.openNotification('Não é possível adicionar um estudante duas vezes no mesmo time', 'error', 6000)
             return
         }
@@ -213,7 +231,17 @@ export function AdminHome(props) {
                     </Container>
                     <Box width={50} />
                     <Container className={classes.participantsContainer}>
-                        <Typography variant='h5'>Participantes</Typography>
+                        <Box className={classes.studentListHeader}>
+                            <Typography variant='h5'>Participantes</Typography>
+                            <Button
+                                className={classes.addStudentButton}
+                                onClick={() => { }}
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                startIcon={<AddIcon />}
+                            > Novo aluno</Button>
+                        </Box>
                         <List className={classes.participantsList}>
                             {allParticipants.map((participant, index) => {
                                 return (

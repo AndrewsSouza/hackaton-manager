@@ -14,6 +14,10 @@ function getTeams() {
     return api.get('/teams')
 }
 
+function getTeamsWithRatings() {
+    return api.get('/teams-with-ratings')
+}
+
 function removeTeam(id) {
     return api.delete(`/teams/${id}`)
 }
@@ -22,5 +26,6 @@ export const teamsService = {
     saveTeam,
     editTeam,
     getTeams,
+    getTeamsWithRatings,
     removeTeam,
 }

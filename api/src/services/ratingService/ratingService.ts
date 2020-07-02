@@ -14,7 +14,7 @@ export default class RatingService implements RatingServiceFacade {
     constructor() {
         this.ratingRepository = new RatingRepository()
         this.appraiserService = ServiceFactory.getAppraiserService()
-        
+
         this.saveRating = this.saveRating.bind(this)
         this.deleteRating = this.deleteRating.bind(this)
         this.findByTeamId = this.findByTeamId.bind(this)
@@ -23,6 +23,10 @@ export default class RatingService implements RatingServiceFacade {
 
     private async findByTeamIdAndAppraiserId(teamId: Number, appraiserId: Number): Promise<Rating> {
         return await this.ratingRepository.findByTeamIdAndAppraiserId(teamId, appraiserId)
+    }
+
+    private formatCpf(cpf: String): String {
+        return cpf.replace('.', '').replace('.', '').replace('-', '')
     }
 
     async saveRating(
@@ -40,6 +44,8 @@ export default class RatingService implements RatingServiceFacade {
         if (numberOfRatingsForTheTeam === 3) {
             return new BaseResponseDto("Este time já possui 3 avaliações", false)
         }
+
+        appraiserCPF = this.formatCpf(appraiserCPF)
 
         const appraiser = await this.appraiserService.findByCpf(appraiserCPF)
 
@@ -59,10 +65,8 @@ export default class RatingService implements RatingServiceFacade {
             return isAppraiserValidResponse
         }
 
-        const rating = new Rating(appraiser.id, teamId, working, process, pitch, innovation, team)
-
         try {
-            await this.ratingRepository.saveRating(rating)
+            await this.ratingRepository.saveRating(appraiser.id, teamId, working, process, pitch, innovation, team)
             return new BaseResponseDto("Avaliação enviada com sucesso")
         } catch (err) {
             const response = new BaseResponseDto("Não foi possível enviar a avaliação", false)

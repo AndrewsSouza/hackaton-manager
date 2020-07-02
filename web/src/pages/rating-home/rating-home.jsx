@@ -51,7 +51,7 @@ export function RatingHome(props) {
     const [teams, setTeams] = useState([])
 
     useEffect(() => {
-        teamsService.getTeams().then(({ data }) => {
+        teamsService.getTeamsWithRatings().then(({ data }) => {
             setTeams(data)
         })
     }, [])
