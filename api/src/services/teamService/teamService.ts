@@ -84,7 +84,7 @@ export default class TeamService implements TeamServiceFacade {
                 const newTeam = new Team(id, students, name)
 
                 const response = new BaseResponseDto("Time cadastrado com sucesso")
-                response.newTeam = newTeam
+                response.team = newTeam
 
                 return response
             } catch (err) {

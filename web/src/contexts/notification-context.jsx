@@ -17,7 +17,7 @@ export function NotificationProvider(props) {
         if (isNotificationOpen) {
             setIsNotificationOpen(false)
             setTimeout(() => {
-                setConfiguration(message, type, autoHideDuration)
+                setConfiguration(message || "Um erro ocorreu", type, autoHideDuration)
             }, 200)
         } else {
             setConfiguration(message, type, autoHideDuration)

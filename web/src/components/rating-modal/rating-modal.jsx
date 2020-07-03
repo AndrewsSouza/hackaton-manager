@@ -8,7 +8,6 @@ import {
     Box,
     Button,
     FormControl,
-    FilledInput,
     InputLabel,
     InputAdornment,
     OutlinedInput
@@ -90,7 +89,7 @@ function FeatureRating({ label, name, onChange, value }) {
     )
 }
 
-export function RatingModal({ teamId }) {
+export function RatingModal({ teamId, onAddRating }) {
     const modalService = useContext(ModalContext)
     const notificationService = useContext(NotificationContext)
 
@@ -130,6 +129,7 @@ export function RatingModal({ teamId }) {
             if (data.success) {
                 setAllRatings(defaultRatings)
                 notificationService.openNotification('Avaliação enviada com sucesso', 'success')
+                onAddRating()
                 modalService.closeModal()
             } else {
                 notificationService.openNotification(data.message, 'error', 6000)

@@ -7,8 +7,12 @@ import AddIcon from '@material-ui/icons/Add'
 import { Header, ParticipantListItem, NewTeamForm, TeamListItem } from '../../components'
 import { studentsService, teamsService } from '../../services'
 
+import { homePathName } from '../index'
+
 import './admin-home.scss'
-import { NotificationContext } from '../../contexts';
+import { NotificationContext, ModalContext, ProfileEnum, ProfileContext } from '../../contexts';
+import { NewStudentModal } from '../../components/new-student-modal/new-student-modal';
+import { useHistory } from 'react-router-dom';
 
 export const pathName = '/admin'
 
@@ -52,16 +56,25 @@ const useStyles = makeStyles({
     addStudentButton: {
         backgroundColor: "#66bb6a",
         color: "FFFFFF",
-        '*':{
+        '*': {
             color: "FFF"
         },
-        '&:hover':{
+        '&:hover': {
             backgroundColor: "#66bb6a",
         }
     }
 })
 
 export function AdminHome(props) {
+    const profileService = useContext(ProfileContext)
+    let history = useHistory()
+
+    useEffect(() => {
+        if (profileService.getProfile() !== ProfileEnum.admin) {
+            history.replace(homePathName)
+        }
+    }, [profileService, history])
+
     const notificationService = useContext(NotificationContext)
 
     const [allParticipants, setAllParticipants] = useState([])
@@ -172,15 +185,21 @@ export function AdminHome(props) {
         })
     }
 
+    const modalService = useContext(ModalContext)
+
+    function openNewStudentModal() {
+        modalService.openModal(<NewStudentModal addNewStudent={std => setAllParticipants([...allParticipants, std])} />)
+    }
+
     const classes = useStyles()
 
     function NoTeamsText() {
         return (
             <Container>
                 <Box height={20} />
-                <Typography variant='p'>
+                <div>
                     Não há times cadastrados
-                 </Typography>
+                 </div>
             </Container>
         )
     }
@@ -235,12 +254,12 @@ export function AdminHome(props) {
                             <Typography variant='h5'>Participantes</Typography>
                             <Button
                                 className={classes.addStudentButton}
-                                onClick={() => { }}
+                                onClick={openNewStudentModal}
                                 variant="contained"
                                 color="primary"
                                 size="small"
                                 startIcon={<AddIcon />}
-                            > Novo aluno</Button>
+                            > Novo Participante</Button>
                         </Box>
                         <List className={classes.participantsList}>
                             {allParticipants.map((participant, index) => {

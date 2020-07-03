@@ -39,8 +39,8 @@ export function LoaderProvider(props) {
 
     return (
         <LoaderContext.Provider value={{ showLoader, hideLoader }}>
-            {children}
             <Loader isLoading={isLoading} />
+            {children}
         </LoaderContext.Provider>
     )
 }

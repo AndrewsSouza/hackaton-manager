@@ -7,7 +7,7 @@ import AdminIcon from '../../assets/images/admin-role-icon.png'
 import RatingIcon from '../../assets/images/rating-role-icon.png'
 
 import { Header, RoleCard } from '../../components'
-import { NotificationContext } from '../../contexts'
+import { NotificationContext, ProfileContext } from '../../contexts'
 
 import './home.scss'
 
@@ -27,14 +27,21 @@ const useStyles = makeStyles((theme) => ({
 
 export function Home(props) {
     const notificationService = useContext(NotificationContext)
+    const profileService = useContext(ProfileContext)
 
     let history = useHistory()
 
     const adminRole = 'Administrador'
     const ratingRole = 'Avaliador'
 
-    function goTo(path) {
-        notificationService.openNotification(`Você está como ${path.startsWith('/admin') ? adminRole : ratingRole}`, 'info')
+    async function goTo(path) {
+        if (path.startsWith('/admin')) {
+            await profileService.setAdminProfile()
+            notificationService.openNotification(`Você está como ${adminRole}`, 'info')
+        } else {
+            await profileService.setAppraiserProfile()
+            notificationService.openNotification(`Você está como ${ratingRole}`, 'info')
+        }
         history.push(path)
     }
 

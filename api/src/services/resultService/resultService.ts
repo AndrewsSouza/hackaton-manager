@@ -50,7 +50,10 @@ export default class ResultService implements ResultServiceFacade {
 
     private sortDesc(teams: Team[]): void {
         teams.sort((teamA, teamB) => {
-            if (teamA > teamB) {
+
+            if (teamA.finalRating && 
+                teamB.finalRating && 
+                teamA.finalRating > teamB.finalRating) {
                 return -1
             }
             return 1
