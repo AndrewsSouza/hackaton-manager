@@ -134,11 +134,13 @@ export function TeamListItem(props) {
         return <Typography>Somatório: {team.finalRating}</Typography>
     }
 
+    console.log(team.url, 'url')
+
     return (
         <ListItem disableRipple={true} button className={[index % 2 === 0 ? classes.evenListItem : null, !onClickCard && classes.listItem]}>
             {isResultPage && <PositionFormat />}
             <ListItemAvatar>
-                <Avatar src={team.url} alt={team.name} />
+                <Avatar src={team.url || "https://cdn.pixabay.com/photo/2016/04/15/18/05/computer-1331579_1280.png"} alt={team.name} />
             </ListItemAvatar>
             <ListItemText primary={team.name} secondary={<TeamDescription />} />
             {isResultPage ? <FinalRating /> : <RenderIcons />}
